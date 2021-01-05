@@ -1,0 +1,15 @@
+<div class="row top-menu">
+    <div class="col-md-10">
+        <div class="col-md-2 text-right">
+            <a href="/" style="padding-right: 10px;">Home</a>
+            {% if login %}
+            <a href="{{ url_for('logout_the_user') }}">Logout</a>
+            {% else %}
+            <a href="{{ url_for('show_login') }}">Log in </a>
+            {% endif %}
+        </div>
+        <div class="col-md-2">
+            <a href="{{ url_for('show_all_categories') }}">Show All Categories</a>
+        </div>
+    </div>
+</div>

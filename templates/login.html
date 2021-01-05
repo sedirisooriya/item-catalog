@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" itemscope itemtype="http://schema.org/Article">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="google-signin-client_id"
+        content="32249089117-c1qjdkj22d8gesa3dnoenagis61u9otb.apps.googleusercontent.com">
+    <title>Item Catalog-Login</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
+    <script src="https://apis.google.com/js/client:platform.js?onload=start" async defer></script>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+
+        function start() {
+            gapi.load('auth2', function () {
+                auth2 = gapi.auth2.init({
+                    client_id: '32249089117-c1qjdkj22d8gesa3dnoenagis61u9otb.apps.googleusercontent.com',
+                });
+            });
+        }
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        {% block content %}
+        {% include "header.html" %}
+        <div class='flash'>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+
+            <ul>
+                {% for message in messages %}
+                <li><strong> {{ message }} </strong></li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+            {% endwith %}
+
+        </div>
+<!-- Unable to load the G+ sign in button therefore a custom button was created -->
+        <div style="margin-top: 20px;"><button id="signinButton" style="background-color: aqua;">Sign in with
+                Google</button></div>
+
+        <script>
+            function signInCallback(authResult) {
+                if (authResult['code']) {
+                    $('#signinButton').attr('style', 'display: none');
+
+                    $.ajax({
+                        type: 'POST',
+                        url: '/gconnect?state={{STATE}}',
+                        processData: false,
+                        data: authResult['code'],
+                        contentType: 'application/octet-stream; charset=utf-8',
+                        success: function (result) {
+                            // Successful login
+                            if (result) {
+                                $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...');
+                                setTimeout(function () {
+                                    window.location.href = "/catalog/categories";
+                                }, 4000);
+                            } else if (authResult['error']) {
+                                console.log('There was an error: ' + authResult['error']);
+                            } else {
+                                $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                            }
+                        },
+                        error: function (result) {
+                            console.log('There was an error: ' + JSON.stringify(result.responseText));
+                        }
+                    });
+                }
+            }
+
+            $('#signinButton').click(function () {
+                // signInCallback function called on button click
+                auth2.grantOfflineAccess().then(signInCallback);
+            });
+        </script>
+        {% endblock %}
+    </div>
+</body>
+
+</html>
